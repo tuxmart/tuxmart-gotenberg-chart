@@ -92,3 +92,18 @@ jobs:
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
         run: ct install --helm-extra-set-args "--values=ci-values.yaml" --upgrade --target-branch ${{ github.event.repository.default_branch }}
+
+  # Stable check to require in branch protection: the lint-test matrix check
+  # names embed the kind node-image SHA and change on every image bump.
+  ci-required:
+    needs: [helm-tools, lint-test]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify required jobs succeeded
+        run: |
+          if [ "${{ needs.helm-tools.result }}" != "success" ] || [ "${{ needs.lint-test.result }}" != "success" ]; then
+            echo "Required jobs failed: helm-tools=${{ needs.helm-tools.result }}, lint-test=${{ needs.lint-test.result }}"
+            exit 1
+          fi
+          echo "All required jobs succeeded."
