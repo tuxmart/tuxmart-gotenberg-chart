@@ -229,6 +229,9 @@ spec:
           {{- if .Values.pdfEngines.embedEngines }}
           - --pdfengines-embed-engines={{ .Values.pdfEngines.embedEngines }}
           {{- end }}
+          {{- if .Values.pdfEngines.embedMetadataEngines }}
+          - --pdfengines-embed-metadata-engines={{ .Values.pdfEngines.embedMetadataEngines }}
+          {{- end }}
           {{- if .Values.pdfEngines.watermarkEngines }}
           - --pdfengines-watermark-engines={{ .Values.pdfEngines.watermarkEngines }}
           {{- end }}
@@ -243,6 +246,9 @@ spec:
           {{- end }}
           {{- if .Values.pdfEngines.writeBookmarksEngines }}
           - --pdfengines-write-bookmarks-engines={{ .Values.pdfEngines.writeBookmarksEngines }}
+          {{- end }}
+          {{- if .Values.pdfEngines.facturXEngines }}
+          - --pdfengines-factur-x-engines={{ .Values.pdfEngines.facturXEngines }}
           {{- end }}
           {{- if .Values.pdfEngines.disableRoutes }}
           - --pdfengines-disable-routes
@@ -305,6 +311,9 @@ spec:
           {{- if $logStdFormat }}
           - --log-std-format={{ $logStdFormat }}
           {{- end }}
+          {{- if .Values.logging.stdLevelCase }}
+          - --log-std-level-case={{ .Values.logging.stdLevelCase }}
+          {{- end }}
           {{- if .Values.logging.level }}
           - --log-level={{ .Values.logging.level }}
           {{- end }}
@@ -363,7 +372,7 @@ spec:
               value: /home/gotenberg
           {{- end }}
           {{- with .Values.extraEnv }}
-          {{- toYaml . | nindent 10 }}
+          {{- toYaml . | nindent 12 }}
           {{- end }}
           ports:
             - name: http
