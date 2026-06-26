@@ -1,0 +1,206 @@
+{{- $env := env "GOTENBERG_ENV" | default (env "SENTINEL_ENV" | default "dev") -}}
+
+releases:
+  - name: {{ env "GOTENBERG_RELEASE_NAME" | default "gotenberg" }}
+    namespace: {{ env "RELEASE_NAMESPACE" | default (printf "gotenberg-%s" $env) }}
+    chart: .
+    version: 1.22.0
+    set:
+      {{- if env "GOTENBERG_NAME_OVERRIDE" }}
+      - name: nameOverride
+        value: {{ env "GOTENBERG_NAME_OVERRIDE" }}
+      {{- end }}
+      {{- if env "GOTENBERG_FULLNAME_OVERRIDE" }}
+      - name: fullnameOverride
+        value: {{ env "GOTENBERG_FULLNAME_OVERRIDE" }}
+      {{- end }}
+      {{- if env "GOTENBERG_REPLICA_COUNT" }}
+      - name: replicaCount
+        value: {{ env "GOTENBERG_REPLICA_COUNT" }}
+      {{- end }}
+      - name: image.repository
+        value: {{ env "GOTENBERG_IMAGE_REPOSITORY" | default "gotenberg/gotenberg" }}
+      {{- if env "GOTENBERG_IMAGE_TAG" }}
+      - name: image.tag
+        value: {{ env "GOTENBERG_IMAGE_TAG" }}
+      {{- end }}
+      - name: image.pullPolicy
+        value: {{ env "GOTENBERG_IMAGE_PULL_POLICY" | default "IfNotPresent" }}
+      {{- if env "GOTENBERG_SERVICE_ACCOUNT_CREATE" }}
+      - name: serviceAccount.create
+        value: {{ env "GOTENBERG_SERVICE_ACCOUNT_CREATE" }}
+      {{- end }}
+      {{- if env "GOTENBERG_SERVICE_ACCOUNT_NAME" }}
+      - name: serviceAccount.name
+        value: {{ env "GOTENBERG_SERVICE_ACCOUNT_NAME" }}
+      {{- end }}
+      {{- if env "GOTENBERG_AUTOMOUNT_SERVICE_ACCOUNT_TOKEN" }}
+      - name: serviceAccount.automountServiceAccountToken
+        value: {{ env "GOTENBERG_AUTOMOUNT_SERVICE_ACCOUNT_TOKEN" }}
+      {{- end }}
+      - name: service.type
+        value: {{ env "GOTENBERG_SERVICE_TYPE" | default "ClusterIP" }}
+      {{- if env "GOTENBERG_SERVICE_PORT" }}
+      - name: service.port
+        value: {{ env "GOTENBERG_SERVICE_PORT" }}
+      {{- end }}
+      {{- if env "GOTENBERG_SERVICE_LOAD_BALANCER_IP" }}
+      - name: service.loadBalancerIP
+        value: {{ env "GOTENBERG_SERVICE_LOAD_BALANCER_IP" }}
+      {{- end }}
+      {{- if env "GOTENBERG_API_TIMEOUT" }}
+      - name: api.timeout
+        value: {{ env "GOTENBERG_API_TIMEOUT" }}
+      {{- end }}
+      {{- if env "GOTENBERG_API_BODY_LIMIT" }}
+      - name: api.bodyLimit
+        value: {{ env "GOTENBERG_API_BODY_LIMIT" }}
+      {{- end }}
+      {{- if env "GOTENBERG_API_DISABLE_DOWNLOAD_FROM" }}
+      - name: api.disableDownloadFrom
+        value: {{ env "GOTENBERG_API_DISABLE_DOWNLOAD_FROM" }}
+      {{- end }}
+      {{- if env "GOTENBERG_API_ENABLE_BASIC_AUTH" }}
+      - name: api.enableBasicAuth
+        value: {{ env "GOTENBERG_API_ENABLE_BASIC_AUTH" }}
+      {{- end }}
+      {{- if env "GOTENBERG_API_BASIC_AUTH_USERNAME" }}
+      - name: api.basicAuthUsername
+        value: {{ env "GOTENBERG_API_BASIC_AUTH_USERNAME" }}
+      {{- end }}
+      {{- if env "GOTENBERG_API_BASIC_AUTH_PASSWORD" }}
+      - name: api.basicAuthPassword
+        value: {{ env "GOTENBERG_API_BASIC_AUTH_PASSWORD" }}
+      {{- end }}
+      {{- if env "GOTENBERG_API_EXISTING_SECRET" }}
+      - name: api.existingSecret
+        value: {{ env "GOTENBERG_API_EXISTING_SECRET" }}
+      {{- end }}
+      {{- if env "GOTENBERG_CHROMIUM_AUTO_START" }}
+      - name: chromium.autoStart
+        value: {{ env "GOTENBERG_CHROMIUM_AUTO_START" }}
+      {{- end }}
+      {{- if env "GOTENBERG_CHROMIUM_START_TIMEOUT" }}
+      - name: chromium.startTimeout
+        value: {{ env "GOTENBERG_CHROMIUM_START_TIMEOUT" }}
+      {{- end }}
+      {{- if env "GOTENBERG_CHROMIUM_DISABLE_WEB_SECURITY" }}
+      - name: chromium.disableWebSecurity
+        value: {{ env "GOTENBERG_CHROMIUM_DISABLE_WEB_SECURITY" }}
+      {{- end }}
+      {{- if env "GOTENBERG_CHROMIUM_MAX_CONCURRENCY" }}
+      - name: chromium.maxConcurrency
+        value: {{ env "GOTENBERG_CHROMIUM_MAX_CONCURRENCY" }}
+      {{- end }}
+      {{- if env "GOTENBERG_CHROMIUM_MAX_QUEUE_SIZE" }}
+      - name: chromium.maxQueueSize
+        value: {{ env "GOTENBERG_CHROMIUM_MAX_QUEUE_SIZE" }}
+      {{- end }}
+      {{- if env "GOTENBERG_LIBREOFFICE_AUTO_START" }}
+      - name: libreOffice.autoStart
+        value: {{ env "GOTENBERG_LIBREOFFICE_AUTO_START" }}
+      {{- end }}
+      {{- if env "GOTENBERG_LIBREOFFICE_START_TIMEOUT" }}
+      - name: libreOffice.startTimeout
+        value: {{ env "GOTENBERG_LIBREOFFICE_START_TIMEOUT" }}
+      {{- end }}
+      {{- if env "GOTENBERG_LIBREOFFICE_DISABLE_ROUTES" }}
+      - name: libreOffice.disableRoutes
+        value: {{ env "GOTENBERG_LIBREOFFICE_DISABLE_ROUTES" }}
+      {{- end }}
+      {{- if env "GOTENBERG_LIBREOFFICE_MAX_QUEUE_SIZE" }}
+      - name: libreOffice.maxQueueSize
+        value: {{ env "GOTENBERG_LIBREOFFICE_MAX_QUEUE_SIZE" }}
+      {{- end }}
+      {{- if env "GOTENBERG_RESOURCES_CPU" }}
+      - name: resources.requests.cpu
+        value: {{ env "GOTENBERG_RESOURCES_CPU" | quote }}
+      - name: resources.limits.cpu
+        value: {{ env "GOTENBERG_RESOURCES_CPU" | quote }}
+      {{- end }}
+      {{- if env "GOTENBERG_RESOURCES_MEMORY" }}
+      - name: resources.requests.memory
+        value: {{ env "GOTENBERG_RESOURCES_MEMORY" | quote }}
+      - name: resources.limits.memory
+        value: {{ env "GOTENBERG_RESOURCES_MEMORY" | quote }}
+      {{- end }}
+      {{- if env "GOTENBERG_AUTOSCALING_ENABLED" }}
+      - name: autoscaling.enabled
+        value: {{ env "GOTENBERG_AUTOSCALING_ENABLED" }}
+      {{- end }}
+      {{- if env "GOTENBERG_AUTOSCALING_MIN_REPLICAS" }}
+      - name: autoscaling.minReplicas
+        value: {{ env "GOTENBERG_AUTOSCALING_MIN_REPLICAS" }}
+      {{- end }}
+      {{- if env "GOTENBERG_AUTOSCALING_MAX_REPLICAS" }}
+      - name: autoscaling.maxReplicas
+        value: {{ env "GOTENBERG_AUTOSCALING_MAX_REPLICAS" }}
+      {{- end }}
+      {{- if env "GOTENBERG_AUTOSCALING_TARGET_CPU" }}
+      - name: autoscaling.targetCPUUtilizationPercentage
+        value: {{ env "GOTENBERG_AUTOSCALING_TARGET_CPU" }}
+      {{- end }}
+      {{- if env "GOTENBERG_AUTOSCALING_TARGET_MEMORY" }}
+      - name: autoscaling.targetMemoryUtilizationPercentage
+        value: {{ env "GOTENBERG_AUTOSCALING_TARGET_MEMORY" }}
+      {{- end }}
+      {{- if env "GOTENBERG_PDB_CREATE" }}
+      - name: pdb.create
+        value: {{ env "GOTENBERG_PDB_CREATE" }}
+      {{- end }}
+      {{- if env "GOTENBERG_PDB_MIN_AVAILABLE" }}
+      - name: pdb.minAvailable
+        value: {{ env "GOTENBERG_PDB_MIN_AVAILABLE" }}
+      {{- end }}
+      {{- if env "GOTENBERG_NETWORK_POLICY_ENABLED" }}
+      - name: networkPolicy.enabled
+        value: {{ env "GOTENBERG_NETWORK_POLICY_ENABLED" }}
+      {{- end }}
+      {{- if env "GOTENBERG_NETWORK_POLICY_ALLOW_INGRESS" }}
+      - name: networkPolicy.allowIngress
+        value: {{ env "GOTENBERG_NETWORK_POLICY_ALLOW_INGRESS" }}
+      {{- end }}
+      {{- if env "GOTENBERG_NETWORK_POLICY_ALLOW_EGRESS" }}
+      - name: networkPolicy.allowEgress
+        value: {{ env "GOTENBERG_NETWORK_POLICY_ALLOW_EGRESS" }}
+      {{- end }}
+      {{- if env "GOTENBERG_PRIORITY_CLASS_NAME" }}
+      - name: priorityClassName
+        value: {{ env "GOTENBERG_PRIORITY_CLASS_NAME" }}
+      {{- end }}
+      {{- if env "GOTENBERG_PRIORITY_CLASS_CREATE" }}
+      - name: priorityClass.create
+        value: {{ env "GOTENBERG_PRIORITY_CLASS_CREATE" }}
+      {{- end }}
+      {{- if env "GOTENBERG_PRIORITY_CLASS_VALUE" }}
+      - name: priorityClass.value
+        value: {{ env "GOTENBERG_PRIORITY_CLASS_VALUE" }}
+      {{- end }}
+      {{- if env "GOTENBERG_GRACEFUL_SHUTDOWN_SECONDS" }}
+      - name: gotenberg.gracefulShutdownDurationSec
+        value: {{ env "GOTENBERG_GRACEFUL_SHUTDOWN_SECONDS" }}
+      {{- end }}
+      {{- if env "GOTENBERG_TMP_SIZE_LIMIT" }}
+      - name: volumes[0].name
+        value: tmp
+      - name: volumes[0].emptyDir.sizeLimit
+        value: {{ env "GOTENBERG_TMP_SIZE_LIMIT" }}
+      - name: volumeMounts[0].name
+        value: tmp
+      - name: volumeMounts[0].mountPath
+        value: /tmp
+      {{- end }}
+      {{- if env "GOTENBERG_PRESTOP_SLEEP_SECONDS" }}
+      - name: lifecycle.preStop.exec.command[0]
+        value: sh
+      - name: lifecycle.preStop.exec.command[1]
+        value: -c
+      - name: lifecycle.preStop.exec.command[2]
+        value: sleep {{ env "GOTENBERG_PRESTOP_SLEEP_SECONDS" }}
+      {{- end }}
+    values:
+      - ./values.yaml
+      - environments/{{ $env }}/values.yaml
+    labels:
+      app: gotenberg
+      component: document-conversion

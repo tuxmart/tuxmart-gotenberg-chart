@@ -1,0 +1,3 @@
+# Optional umbrella Helmfile for local and CI rendering.
+helmfiles:
+  - path: charts/gotenberg/helmfile.yaml.gotmpl

@@ -3,7 +3,8 @@
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/gotenberg)](https://artifacthub.io/packages/helm/maikumori/gotenberg)
 ![Version: 1.22.0](https://img.shields.io/badge/Version-1.22.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 8.34.0](https://img.shields.io/badge/AppVersion-8.34.0-informational?style=flat-square)
 
-This is a HELM chart for Gotenberg.
+This is a Helm chart for deploying Gotenberg as a standalone Kubernetes
+Deployment.
 
 Gotenberg provides a developer-friendly API to interact with powerful tools like Chromium and LibreOffice for converting numerous document formats (HTML, Markdown, Word, Excel, etc.) into PDF files, and more!
 
@@ -69,6 +70,39 @@ helm upgrade --install --atomic my-release oci://ghcr.io/maikumori/helm-charts/g
 ```
 
 This allows you to stay current with Gotenberg releases without waiting for a new chart version, as there are typically no breaking changes between versions.
+
+## Helmfile
+
+This chart includes an optional `helmfile.yaml.gotmpl` for environment-based
+deployments. The repository root also has a small `helmfile.yaml` wrapper that
+delegates to this file for the single Gotenberg chart:
+
+```console
+export GOTENBERG_ENV=dev # or staging | prod
+helmfile template
+```
+
+`GOTENBERG_ENV` takes precedence over `SENTINEL_ENV`. If neither is set, the
+chart renders the `dev` overlay. `RELEASE_NAMESPACE` overrides the release
+namespace.
+
+The `staging` and `prod` overlays are tuned for long-running HTML/PDF workloads:
+service port `3000`, 90-second API timeout, bounded multipart body size, HPA,
+PDB, NetworkPolicy, `/tmp` `emptyDir`, graceful shutdown, and a `preStop` drain.
+Before changing the pinned Gotenberg image tag in those overlays, run smoke tests
+that cover Chromium CJK rendering and LibreOffice page counters.
+
+Common Helmfile environment overrides:
+
+- Release: `GOTENBERG_RELEASE_NAME`, `RELEASE_NAMESPACE`, `GOTENBERG_ENV`, `SENTINEL_ENV`
+- Image: `GOTENBERG_IMAGE_REPOSITORY`, `GOTENBERG_IMAGE_TAG`, `GOTENBERG_IMAGE_PULL_POLICY`
+- Service: `GOTENBERG_SERVICE_TYPE`, `GOTENBERG_SERVICE_PORT`, `GOTENBERG_SERVICE_LOAD_BALANCER_IP`
+- API: `GOTENBERG_API_TIMEOUT`, `GOTENBERG_API_BODY_LIMIT`, `GOTENBERG_API_DISABLE_DOWNLOAD_FROM`
+- Chromium: `GOTENBERG_CHROMIUM_AUTO_START`, `GOTENBERG_CHROMIUM_START_TIMEOUT`, `GOTENBERG_CHROMIUM_DISABLE_WEB_SECURITY`, `GOTENBERG_CHROMIUM_MAX_CONCURRENCY`, `GOTENBERG_CHROMIUM_MAX_QUEUE_SIZE`
+- LibreOffice: `GOTENBERG_LIBREOFFICE_AUTO_START`, `GOTENBERG_LIBREOFFICE_START_TIMEOUT`, `GOTENBERG_LIBREOFFICE_DISABLE_ROUTES`, `GOTENBERG_LIBREOFFICE_MAX_QUEUE_SIZE`
+- Capacity: `GOTENBERG_RESOURCES_CPU`, `GOTENBERG_RESOURCES_MEMORY`, `GOTENBERG_AUTOSCALING_ENABLED`, `GOTENBERG_AUTOSCALING_MIN_REPLICAS`, `GOTENBERG_AUTOSCALING_MAX_REPLICAS`, `GOTENBERG_AUTOSCALING_TARGET_CPU`, `GOTENBERG_AUTOSCALING_TARGET_MEMORY`
+- Availability/security: `GOTENBERG_PDB_CREATE`, `GOTENBERG_PDB_MIN_AVAILABLE`, `GOTENBERG_NETWORK_POLICY_ENABLED`, `GOTENBERG_NETWORK_POLICY_ALLOW_INGRESS`, `GOTENBERG_NETWORK_POLICY_ALLOW_EGRESS`, `GOTENBERG_AUTOMOUNT_SERVICE_ACCOUNT_TOKEN`
+- Long-running report tuning: `GOTENBERG_GRACEFUL_SHUTDOWN_SECONDS`, `GOTENBERG_PRESTOP_SLEEP_SECONDS`, `GOTENBERG_TMP_SIZE_LIMIT`, `GOTENBERG_PRIORITY_CLASS_NAME`, `GOTENBERG_PRIORITY_CLASS_CREATE`, `GOTENBERG_PRIORITY_CLASS_VALUE`
 
 ## Values
 
@@ -148,6 +182,7 @@ This allows you to stay current with Gotenberg releases without waiting for a ne
 | ingress.labels | object | `{}` | Set the labels of the ingress |
 | ingress.tls | list | `[]` | Set the TLS configuration for the ingress, see values.yaml for an example. |
 | initContainers | list | `[]` | List of init containers for the gotenberg pod |
+| lifecycle | object | `{}` | Container lifecycle hooks. |
 | libreOffice.allowList | string | `""` | Set the allowed URLs for LibreOffice outbound fetches (embedded external content in OOXML/RTF/ODF) using a regular expression. Added in Gotenberg 8.32.0. |
 | libreOffice.autoStart | bool | `false` | Automatically launch LibreOffce upon initialization if set to true; otherwise, LibreOffice will start at the time of the first conversion (default false) |
 | libreOffice.denyList | string | `""` | Set the denied URLs for LibreOffice outbound fetches using a regular expression. Added in Gotenberg 8.32.0. |
@@ -208,6 +243,12 @@ This allows you to stay current with Gotenberg releases without waiting for a ne
 | podAnnotations | object | `{}` |  |
 | podLabels | object | `{}` | List of additional pod labels |
 | podSecurityContext | object | `{}` |  |
+| priorityClass.create | bool | `false` | Create a PriorityClass for Gotenberg pods. |
+| priorityClass.description | string | `"Priority class for Gotenberg document conversion workloads."` | PriorityClass description. |
+| priorityClass.globalDefault | bool | `false` | Whether this PriorityClass should be the global default. |
+| priorityClass.name | string | `""` | Name of the PriorityClass to create. Defaults to priorityClassName, then the chart fullname. |
+| priorityClass.value | int | `1000000` | PriorityClass value. |
+| priorityClassName | string | `""` | Priority class name for the pod. |
 | progressDeadlineSeconds | int | `120` |  |
 | prometheus.collectInterval | string | `""` | Set the interval for collecting modules' metrics (default 1s) |
 | prometheus.disableCollect | bool | `false` | Disable the collect of metrics |
@@ -224,6 +265,7 @@ This allows you to stay current with Gotenberg releases without waiting for a ne
 | service.port | int | `80` |  |
 | service.type | string | `"ClusterIP"` |  |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
+| serviceAccount.automountServiceAccountToken | bool | `false` | Controls whether Kubernetes should mount a service account token into the pod. |
 | serviceAccount.create | bool | `false` | Specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | startupProbe | object | `{"failureThreshold":30,"httpGet":{"path":"/health","port":"http"},"periodSeconds":10}` | Define the startup probe object for the container. +docs:property startupProbe: {} |

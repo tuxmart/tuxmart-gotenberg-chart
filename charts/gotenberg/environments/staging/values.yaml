@@ -1,0 +1,122 @@
+# Staging profile for Sentinel green-building report generation.
+# Keep this tag pinned. Before changing it, run the CJK Chromium and
+# LibreOffice page-counter smoke tests described in the GB report plan.
+image:
+  tag: "8.34.0"
+
+replicaCount: 2
+
+service:
+  type: ClusterIP
+  port: 3000
+
+serviceAccount:
+  automountServiceAccountToken: false
+
+api:
+  timeout: 90s
+  bodyLimit: 200MB
+  disableDownloadFrom: true
+
+chromium:
+  autoStart: true
+  startTimeout: 30s
+  disableWebSecurity: false
+  maxConcurrency: 2
+  maxQueueSize: 10
+
+libreOffice:
+  autoStart: true
+  startTimeout: 30s
+  disableRoutes: false
+  maxQueueSize: 10
+
+resources:
+  requests:
+    cpu: "2"
+    memory: 4Gi
+  limits:
+    cpu: "2"
+    memory: 4Gi
+
+startupProbe:
+  httpGet:
+    path: /health
+    port: http
+  failureThreshold: 30
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 75
+
+pdb:
+  create: true
+  minAvailable: 1
+
+networkPolicy:
+  enabled: true
+  allowIngress: false
+  allowEgress: false
+  extraIngress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: sentinel-reporting-engine
+      ports:
+        - port: 3000
+          protocol: TCP
+
+priorityClassName: gb-report-generation
+priorityClass:
+  create: true
+  name: gb-report-generation
+  value: 1000000
+  globalDefault: false
+  description: "Priority class for Sentinel green-building report generation."
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: gotenberg
+
+volumes:
+  - name: tmp
+    emptyDir:
+      sizeLimit: 1Gi
+
+volumeMounts:
+  - name: tmp
+    mountPath: /tmp
+
+gotenberg:
+  gracefulShutdownDurationSec: 120
+
+lifecycle:
+  preStop:
+    exec:
+      command: ["sh", "-c", "sleep 30"]

@@ -27,6 +27,8 @@ serviceAccount:
   # -- The name of the service account to use.
   ## If not set and create is true, a name is generated using the fullname template
   name: ""
+  # -- Controls whether Kubernetes should mount a service account token into the pod.
+  automountServiceAccountToken: false
 
 podAnnotations: {}
 
@@ -145,6 +147,21 @@ tolerations: []
 
 affinity: {}
 
+# -- Priority class name for the pod.
+priorityClassName: ""
+
+priorityClass:
+  # -- Create a PriorityClass for Gotenberg pods.
+  create: false
+  # -- Name of the PriorityClass to create. Defaults to priorityClassName, then the chart fullname.
+  name: ""
+  # -- PriorityClass value.
+  value: 1000000
+  # -- Whether this PriorityClass should be the global default.
+  globalDefault: false
+  # -- PriorityClass description.
+  description: "Priority class for Gotenberg document conversion workloads."
+
 topologySpreadConstraints: []
 
 volumes: []
@@ -175,6 +192,12 @@ initContainers: []
 #  - name: init-myservice
 #    image: busybox:1.28
 #    command: ['sh', '-c', 'echo init container']
+
+# -- Container lifecycle hooks.
+lifecycle: {}
+#  preStop:
+#    exec:
+#      command: ["sh", "-c", "sleep 30"]
 
 ingress:
   # -- Set to true to enable ingress record generation. WARNING: Gotenberg shouldn't be exposed to the internet.

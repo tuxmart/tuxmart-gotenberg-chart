@@ -1,0 +1,52 @@
+# Lightweight local/dev profile.
+# The service uses port 3000 so in-cluster clients can use http://gotenberg:3000
+# consistently across environments.
+image:
+  tag: "8.34.0"
+
+service:
+  type: ClusterIP
+  port: 3000
+
+api:
+  timeout: 90s
+  bodyLimit: 100MB
+  disableDownloadFrom: true
+
+chromium:
+  autoStart: false
+  startTimeout: 30s
+  disableWebSecurity: false
+  maxConcurrency: 1
+  maxQueueSize: 4
+
+libreOffice:
+  autoStart: false
+  startTimeout: 30s
+  disableRoutes: false
+  maxQueueSize: 4
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: "1"
+    memory: 2Gi
+
+volumes:
+  - name: tmp
+    emptyDir:
+      sizeLimit: 1Gi
+
+volumeMounts:
+  - name: tmp
+    mountPath: /tmp
+
+gotenberg:
+  gracefulShutdownDurationSec: 120
+
+lifecycle:
+  preStop:
+    exec:
+      command: ["sh", "-c", "sleep 30"]

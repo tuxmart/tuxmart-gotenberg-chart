@@ -50,6 +50,9 @@
         "libreOffice": {
           "$ref": "#/$defs/helm-values.libreOffice"
         },
+        "lifecycle": {
+          "$ref": "#/$defs/helm-values.lifecycle"
+        },
         "livenessProbe": {
           "$ref": "#/$defs/helm-values.livenessProbe"
         },
@@ -82,6 +85,12 @@
         },
         "podSecurityContext": {
           "$ref": "#/$defs/helm-values.podSecurityContext"
+        },
+        "priorityClass": {
+          "$ref": "#/$defs/helm-values.priorityClass"
+        },
+        "priorityClassName": {
+          "$ref": "#/$defs/helm-values.priorityClassName"
         },
         "progressDeadlineSeconds": {
           "$ref": "#/$defs/helm-values.progressDeadlineSeconds"
@@ -852,6 +861,11 @@
       "type": "string",
       "default": ""
     },
+    "helm-values.lifecycle": {
+      "description": "-- Container lifecycle hooks.",
+      "type": "object",
+      "default": {}
+    },
     "helm-values.livenessProbe": {
       "description": "-- Define the liveness probe object for the container.\nlivenessProbe: {}",
       "type": "object",
@@ -1264,6 +1278,57 @@
       "type": "object",
       "default": {}
     },
+    "helm-values.priorityClass": {
+      "type": "object",
+      "properties": {
+        "create": {
+          "$ref": "#/$defs/helm-values.priorityClass.create"
+        },
+        "description": {
+          "$ref": "#/$defs/helm-values.priorityClass.description"
+        },
+        "globalDefault": {
+          "$ref": "#/$defs/helm-values.priorityClass.globalDefault"
+        },
+        "name": {
+          "$ref": "#/$defs/helm-values.priorityClass.name"
+        },
+        "value": {
+          "$ref": "#/$defs/helm-values.priorityClass.value"
+        }
+      },
+      "additionalProperties": false
+    },
+    "helm-values.priorityClass.create": {
+      "description": "-- Create a PriorityClass for Gotenberg pods.",
+      "type": "boolean",
+      "default": false
+    },
+    "helm-values.priorityClass.description": {
+      "description": "-- PriorityClass description.",
+      "type": "string",
+      "default": "Priority class for Gotenberg document conversion workloads."
+    },
+    "helm-values.priorityClass.globalDefault": {
+      "description": "-- Whether this PriorityClass should be the global default.",
+      "type": "boolean",
+      "default": false
+    },
+    "helm-values.priorityClass.name": {
+      "description": "-- Name of the PriorityClass to create. Defaults to priorityClassName, then the chart fullname.",
+      "type": "string",
+      "default": ""
+    },
+    "helm-values.priorityClass.value": {
+      "description": "-- PriorityClass value.",
+      "type": "number",
+      "default": 1000000
+    },
+    "helm-values.priorityClassName": {
+      "description": "-- Priority class name for the pod.",
+      "type": "string",
+      "default": ""
+    },
     "helm-values.progressDeadlineSeconds": {
       "type": "number",
       "default": 120
@@ -1387,6 +1452,9 @@
         "annotations": {
           "$ref": "#/$defs/helm-values.serviceAccount.annotations"
         },
+        "automountServiceAccountToken": {
+          "$ref": "#/$defs/helm-values.serviceAccount.automountServiceAccountToken"
+        },
         "create": {
           "$ref": "#/$defs/helm-values.serviceAccount.create"
         },
@@ -1400,6 +1468,11 @@
       "description": "-- Annotations to add to the service account",
       "type": "object",
       "default": {}
+    },
+    "helm-values.serviceAccount.automountServiceAccountToken": {
+      "description": "-- Controls whether Kubernetes should mount a service account token into the pod.",
+      "type": "boolean",
+      "default": false
     },
     "helm-values.serviceAccount.create": {
       "description": "-- Specifies whether a service account should be created",
