@@ -14,14 +14,18 @@ spec:
     - Egress
   ingress:
 {{- if .Values.networkPolicy.allowIngress }}
-  - {}
+    - {}
+{{- else if .Values.networkPolicy.extraIngress }}
+{{- toYaml .Values.networkPolicy.extraIngress | nindent 4 }}
 {{- else }}
-  {{- toYaml .Values.networkPolicy.extraIngress | nindent 2 }}
+    []
 {{- end }}
   egress:
 {{- if .Values.networkPolicy.allowEgress }}
-  - {}
+    - {}
+{{- else if .Values.networkPolicy.extraEgress }}
+{{- toYaml .Values.networkPolicy.extraEgress | nindent 4 }}
 {{- else }}
-  {{- toYaml .Values.networkPolicy.extraEgress | nindent 2 }}
+    []
 {{- end }}
 {{- end }}
